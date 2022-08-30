@@ -60,119 +60,279 @@ function get_loc(lnk, arg) {
 }
 
 function make_log(obj) {
-  switch (obj[1]) {
+    switch (obj[1]) {
     case LOG_MOVE:
-      return {
-        tag: "move",
-        idx: BigInt(obj[0]),
-        tid: BigInt(obj[2]),
-        loc: BigInt(obj[3]),
-      };
+	return {
+            tag: "MOVE",
+            idx: BigInt(obj[0]),
+            tid: BigInt(obj[2]),
+            loc: BigInt(obj[3]),
+	};
     case LOG_LINK:
-      return {
-        tag: "link",
-        idx: BigInt(obj[0]),
-        tid: BigInt(obj[2]),
-        loc: BigInt(obj[3]),
-        ptr: make_ptr(BigInt(obj[4])),
-      };
+	return {
+            tag: "LINK",
+            idx: BigInt(obj[0]),
+            tid: BigInt(obj[2]),
+            loc: BigInt(obj[3]),
+            ptr: make_ptr(BigInt(obj[4])),
+	};
     case LOG_LOCK:
-      return {
-        tag: "lock",
-        idx: BigInt(obj[0]),
-        tid: BigInt(obj[2]),
-        loc: BigInt(obj[3]),
-      };
+	return {
+            tag: "LOCK",
+            idx: BigInt(obj[0]),
+            tid: BigInt(obj[2]),
+            loc: BigInt(obj[3]),
+	};
     case LOG_OPEN:
-      return {
-        tag: "open",
-        idx: BigInt(obj[0]),
-        tid: BigInt(obj[2]),
-        loc: BigInt(obj[3]),
-      };
-  }
+	return {
+            tag: "OPEN",
+            idx: BigInt(obj[0]),
+            tid: BigInt(obj[2]),
+            loc: BigInt(obj[3]),
+	};
+    case LOG_FREE:
+	return {
+ 	    tag: "FREE",
+	    idx: BigInt(obj[0]),
+	    tid: BigInt(obj[2]),
+	    loc: BigInt(obj[3]),
+	}
+    }
 }
 
 function make_ptr(ptr) {
-  switch (get_tag(ptr)) {
+    switch (get_tag(ptr)) {
     case VAR: return {
-      tag: "VAR",
-      loc: get_val(ptr),
+	tag: "VAR",
+	loc: get_val(ptr),
     };
     case DP0: return {
-      tag: "DP0",
-      col: get_ext(ptr),
-      loc: get_val(ptr),
+	tag: "DP0",
+	col: get_ext(ptr),
+	loc: get_val(ptr),
     };
     case DP1: return {
-      tag: "DP1",
-      col: get_ext(ptr),
-      loc: get_val(ptr),
+	tag: "DP1",
+	col: get_ext(ptr),
+	loc: get_val(ptr),
     };
     case ARG: return {
-      tag: "ARG",
-      loc: get_val(ptr),
+	tag: "ARG",
+	loc: get_val(ptr),
     };
     case ERA: return {
-      tag: "ERA",
+	tag: "ERA",
     };
     case LAM: return {
-      tag: "LAM",
-      loc: get_val(ptr),
+	tag: "LAM",
+	loc: get_val(ptr),
     };
     case APP: return {
-      tag: "APP",
-      loc: get_val(ptr),
+	tag: "APP",
+	loc: get_val(ptr),
     };
     case PAR: return {
-      tag: "SUP",
-      col: get_ext(ptr),
-      loc: get_val(ptr),
+	tag: "SUP",
+	col: get_ext(ptr),
+	loc: get_val(ptr),
     };
     case OP2: return {
-      tag: "OP2",
-      ope: get_ext(ptr),
-      loc: get_val(ptr),
+	tag: "OP2",
+	ope: get_ext(ptr),
+	loc: get_val(ptr),
     };
     case NUM: return {
-      tag: "NUM",
-      val: get_val(ptr),
+	tag: "NUM",
+	val: get_val(ptr),
     };
-    case CTR: return {
-      tag: "CTR",
-      fid: get_ext(ptr),
-      nam: NAME[get_ext(ptr)] | "?",
-      ari: ARITY[get_ext(ptr)] | 0,
-      loc: get_val(ptr),
+    case CTR:
+	return {
+	tag: "CTR",
+	fid: get_ext(ptr),
+	nam: NAME[get_ext(ptr)] || "?",
+	ari: ARITY[get_ext(ptr)] || 0,
+	loc: get_val(ptr),
     };
     case CAL: return {
-      tag: "FUN",
-      fid: get_ext(ptr),
-      nam: NAME[get_ext(ptr)] | "?",
-      ari: ARITY[get_ext(ptr)] | 0,
-      loc: get_val(ptr),
+	tag: "FUN",
+	fid: get_ext(ptr),
+	nam: NAME[get_ext(ptr)] || "?",
+	ari: ARITY[get_ext(ptr)] || 0,
+	loc: get_val(ptr),
     };
-    default: return {
-      tag: "???",
-    };
-  }
+    default:
+	console.error(ptr);
+	return {
+	    tag: "???",
+	};
+    }
+}
+
+
+function getKeyByValue(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
+}
+
+
+function nodeColor(elem) {
+    var lnk = elem.data("lnk")
+    switch (lnk.tag) {
+    case "LAM":	return 'BlanchedAlmond';
+    case "SUP": return 'Coral';
+    case "APP": return 'DarkSeaGreen';
+    case "DP0":
+    case "DP1": return 'IndianRed';
+    case "OP2": return 'SandyBrown'
+    case "CTR":
+    case "FUN": return 'lightgreen'; // TODO: color generator based on ctr/fun id;
+    default: return "gray";
+    }
+}
+
+// function that gets the text written inside node
+function inlineText(loc) {
+    var arg = memory[loc];
+    if (arg === undefined) {
+	return "?"
+    }
+    else if (arg.tag === "NUM") {
+	return arg.val;
+    }
+    else if (arg.tag === "CTR" || arg.tag === "FUN") {
+	if (arg.ari === 0) {
+	    return arg.nam;
+	}
+	else return "_"
+    }
+    else if (arg.tag === "VAR") {
+	return `x${arg.loc}`;
+    }
+    else if (arg.tag === "ARG") {
+	return `x${arg.loc}`;
+    }
+    else if (arg.tag === "DP0") {
+	return `a${arg.loc}`;
+    }
+    else if (arg.tag === "DP1") {
+	return `b${arg.loc}`;
+    }
+    else 
+	return "_";
+}
+
+// function that returns the main
+// text to be displayed in a node.
+function nodeText(elem) {
+    var lnk = elem.data("lnk");
+    switch (lnk.tag) {
+    case "LAM":
+	return `λ x${lnk.loc} ${inlineText(lnk.loc + 1n)}`
+    case "SUP":
+	return `{${inlineText(lnk.loc)} ${inlineText(lnk.loc + 1n)}}`
+    case "APP":
+	return `@ ${inlineText(lnk.loc)} ${inlineText(lnk.loc + 1n)}`
+    case "DP0":
+    case "DP1":
+	return `dup a${lnk.loc} b${lnk.loc} = ${inlineText(lnk.loc + 2n)}`;
+    case "OP2":
+	return `${getOpeName(lnk.ope)} ${inlineText(lnk.loc)} ${inlineText(lnk.loc + 1n)}`;
+    case "CTR":
+    case "FUN":
+	var name = lnk.nam;
+	var text = name;
+	for (var i=0; i < lnk.ari; i++) {
+	    text += " " + inlineText(lnk.loc + BigInt(i));
+	}
+	return text;
+    case "NUM":
+	return "NUM ${lnk.val}"
+    case "ROOT":
+	return "ROOT " + inlineText(0);
+    case "ERA":
+	return "ERASED";
+    default:
+	return "???"
+    }
+}
+
+function nodeWidth(elem) {
+    var text = nodeText(elem);
+    return text.length * 10 // 10?
+}
+
+// function that colors based on thread id
+// but this is kinda dumb
+function borderColor(elem) {
+    var tid = elem.data("tid");
+    switch (tid) {
+    case 0n : return "green";
+    case 1n : return "blue";
+    case 2n : return "gray";
+    case 3n : return "orange";
+    case 4n : return "magenta";
+    case 5n : return "lime";
+    case 6n : return "purple";
+    case 7n : return "yellow";
+    default: return false;
+    }
+}
+
+function add_to_event_list(log) {
+    var event_list = document.getElementById('event-list');
+    var text = (log.tag === "LINK") ? `T${log.tid} - ${log.tag} ${log.loc} ${log.ptr.tag}` : `T${log.tid} - ${log.tag} ${log.loc}`;
+    var entry = document.createElement('li');
+    entry.setAttribute("id", `L${log.idx}`);
+    entry.appendChild(document.createTextNode(text))
+    event_list.insertBefore(entry, event_list.firstChild);
 }
 
 window.onload = () => {
-
-  var cvs = document.getElementById("cvs");
-  var ctx = cvs.getContext("2d");
-
-  function circle(ctx, x, y, r) {
-    ctx.beginPath();
-    ctx.arc(x, y, 50, 0, 2 * Math.PI);
-    ctx.stroke();
-  }
-
-  circle(ctx, 50, 50, 10);
-
-  for (var i = 0; i < LOG.length; ++i) {
-    console.log(make_log(LOG[i]));
-  }
-
+  var cy = cytoscape({
+      container: document.getElementById('cy'), // container to render in
+      classes: ["VAR", "DP0", "DP1", "ARG", "ERA", "LAM", "APP", "SUP", "OP2", "NUM", "CTR", "FUN" ], // will remove them later
+      style: cytoscape.stylesheet()
+	  .selector("edge").css({
+	      'target-arrow-shape': 'triangle',
+	      'curve-style': 'bezier',
+	  })
+	  .selector("node").css({
+	      'shape': 'round-rectangle',
+	      'height': 50, // 50?
+              'width': nodeWidth,
+	      'text-halign': 'center',
+              'text-valign': 'center',
+	      'padding': 2, // 2?
+	      'content': nodeText,
+	      'background-color': nodeColor,
+	  })
+	  .selector(".MOVE").css({
+	      'border-width': 4,
+	      'border-style': "solid",
+	      'border-color': borderColor
+	  })
+	  .selector(".LOCK").css({
+	      'border-width': 5,
+	      'border-style': 'double',
+	      'border-color': 'red'
+	  })
+	  .selector(".MOUSE_HOVER").css({
+	      'background-color': 'red'
+	  })
+  });
+    
+    event_index = 0;
+    const root = {tag: "ROOT", loc: 0, ari: 1, nam: 'ROOT', fid: -1}
+    link(-1, root, cy);
+    
+    var button = document.getElementById("nextEvent");
+    button.onclick = () => {
+	if (event_index < LOG.length) {
+	    let log = make_log(LOG[event_index]);
+	    process_event(log, cy);
+	    add_to_event_list(log);
+	}
+	else
+	    button.disabled = true;
+	event_index++;
+    }
 };

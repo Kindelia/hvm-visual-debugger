@@ -1,10 +1,107 @@
 <html>
   <head>
     <script src="log.js"></script>
-    <script src="index.js"></script>
+    <script src="graph.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js" integrity="sha512-KTe+SDYh8ExHDmrSZuoKkFoFQDSU3ywInRi9SkE0ENpJu72GS+UAxd/l0CAXF8DaGGGOLKd7wKRoa7mEirvIpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-cose-bilkent/1.6.5/cytoscape-cose-bilkent.js"></script> -->
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+
   </head>
+  <style> /* eu odeio css */
+   #cy {
+       flex-grow: 1;
+       height: 100%;
+       width: 80%;
+       float: right;
+   }
+   
+   nav {
+       width: 20%;
+       height: 100%;
+       overflow: auto;
+       position: fixed;
+   }
+   #memory {
+       width: 50%;
+       position: absolute;
+       display: inline-block;
+   }
+   #memory-list {
+       list-style-type: none;
+       padding-left: 0pt;
+   }
+   #memory-list li {
+       width: 100%;
+       padding-top: 0.1em;
+       padding-bottom: 0.1em;
+       font-size: 115%;
+       display: inline-block;
+       border-right: 1px;
+   }
+   #event {
+       width: 50%;
+       float: right;
+   }
+   #event-list {
+       list-style-type: none;
+       padding-left: 0pt;
+       display: inline-block;
+   }
+   #event-list li {
+       width: 100%;
+       padding-top: 0.1em;
+       padding-bottom: 0.1em;
+       font-size: 115%;
+       display: inline-block;
+       border-right: 1px;
+   }
+   h1 {
+       margin: 0;
+       padding: 0;
+   }
+   
+   .container {
+       position: relative;
+       clear: left;
+   }
+   .ROOT {
+       background-color: Sienna;
+   }
+   .LAM {
+       background-color : BlanchedAlmon;
+   }
+   
+   .SUP {background-color : Coral;}
+   .APP {background-color : DarkSeaGreen;}
+   .LAM {background-color : BlanchedAlmon;}
+   .DP0, .DP1 {background-color : IndianRed;}
+   .LAM {background-color : BlanchedAlmond;}
+   .OP2 {background-color : SandyBrown;}
+   .VAR, .ARG {background-color : lightgray;}
+   .NUM {background-color: lightpink; }
+   .CTR, .FUN {background-color : lightgreen;}
+   
+  </style>
   <body>
-    <canvas id="cvs">
-    </canvas>
+      <div class="container">
+	  <button id="nextEvent">NEXT EVENT</button>
+	  <nav>
+	      <span id="memory">
+		  <h1>MEMORY</h1>
+		  <ul id="memory-list">
+		  </ul>
+	      </span>
+	      <span id="event">
+		  <h1>EVENTS</h1>
+		  <ul id="event-list">
+		  </ul>
+	      </span>
+	  </nav>
+	  <div id="cy">
+	  </div>
+      </div>
+      <script src="index.js"></script>
   </body>
 </html>
