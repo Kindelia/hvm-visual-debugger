@@ -42,7 +42,7 @@ There are 12 link types:
 - `FUN(function_id, loc)`, which encodes a function id and a location for the first argument. It's semantics are very similar to constructors, and the only practical difference is that functions generate rewrite rules.
 - `ARG(loc)`, which encodes an argument to a lambda, a duplication or a superposition, that is used at `loc` position.
 - `VAR(loc)`, which encodes the usage of a variable that was created at `loc` position. Whenever an `VAR(l)` is created at position `p`, the corresponding `ARG(p)` is created at position `l`.
-- `ERA`, which encodes an erased variable that. It does not have any arguments.
+- `ERA`, which encodes an erased variable. It does not have any arguments.
 - `DP0(color, loc), DP1(color, loc)`, which encodes a duplication node. Notice that this is the only case where there are two nodes pointing to the same `loc` in memory, and it is on purpose, since they are creating two references to the same expression. Also note that it does not have a body stored inside it (as in a scope), rather it's `loc` points to the first variable being duplicated, `loc + 1` points to the second duplicated variable and `loc + 2` points to the duplicated expression. This is exactly why all `dup`'s nodes "float" around in the global scope.
 - `NUM(val)` which technically does not represent a node since all number are unboxed (inlined). Rather, all `NUM`'s represent the actual numerical value that is being stored in that position (instead of storing a pointer to a position). Because of this, they are always represented inside some other node (together with 0-arity constructors and functions).
 
